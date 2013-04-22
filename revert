@@ -1,0 +1,83 @@
+#!/bin/bash
+########################################################################
+#             Delet repo and Restore repo backup or file               #
+#            backup in repo (usage: revert <repo> [file])              #
+########################################################################
+function revert_repo {
+  #no repo.bck error
+  [ ! -d ."$1".bck ] && \
+   clear && \
+   echo " Backup folder <"$1"> not found" && \
+   echo "  usage: revert <repo> [file]" && \
+   bash backup && exit
+  #no error in the "next cp" if there is no repo folder
+  if [ ! -d "$1" ]; then
+     mkdir "$1";
+  fi
+  #rm recoursive, verbose
+  clear
+  #cp ,recoursive,verbose,preserve attributes, interactive(y/n)
+  read -p " Remove repo files before restoring backup?(y/n)? "
+  [ "$REPLY" == "y" ] && \
+  rm -rv ./"$1" && \
+  cp -iprv ./."$1".bck ./"$1"
+  [ "$REPLY" == "n" ] && \
+  cp -iprv ./."$1".bck/* ./"$1"
+  return
+}
+
+function revert_file { 
+  #no repo.bck error
+  [ ! -d ."$1".bck ] && \
+   clear && \
+   echo " Backup folder <"$1"> not found" && \
+   echo "  usage: revert <repo> [file]" && \
+   bash backup && exit
+  #no error in the "next cp" if there is no repo folder
+  if [ ! -d "$1" ]; then
+     mkdir "$1";
+  fi
+  #rm recoursive, verbose
+  clear
+  exec 3<&0
+  #dirname: from a path string extract only path without basename(file name)
+  # testing if $filepath exist because if no cp in folder/""/ generate an err
+  find ./."$1".bck/ -type f -name "$2" | cut -d "/" -f3- | while read a_file
+   do
+    read -p " Copy <$a_file> from backup(y/n)? " <&3 
+    [ "$REPLY" == "y" ] && \
+    file_path=$(dirname "$a_file") && \
+    if [ ! "$file_path"=="" ]; then
+      #cp parents if new file has no parents, p=preserve atime ctime etc
+      cp -pv ./."$1".bck/"$a_file" ./"$1" ;
+     else 
+      if [ ! -d ./"$1"/"$file_path" ]; then
+        mkdir -p ./"$1"/"$file_path";
+      fi
+      cp -pv ./."$1".bck/"$a_file" ./"$1"/"$file_path"/ ;
+    fi
+   done
+
+  exec 3<&-
+  bash backup && exit
+}
+
+#if only repo(param) revert repo else revert file(param2)
+if [ "$2" = "" ]; then
+   if [ "$1" = "" ]; then
+    clear;
+    echo "  usage: revert <repo> [file]";
+    bash backup && exit;
+   else
+    revert_repo "$1";
+    bash backup && exit;
+   fi
+else
+ revert_file "$1" "$2";
+ bash backup && exit;
+fi
+ 
+
+revert_file "$1" "$2"
+bash backup && exit
+########################################################################

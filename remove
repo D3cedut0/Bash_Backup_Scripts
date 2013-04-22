@@ -1,0 +1,62 @@
+#!/bin/bash
+################################################################################################
+##               Usage: remove <file> , then select repo contains the file                    ##
+##     Script allows to search a file by name in a repo and in its backup and to remove it    ##
+################################################################################################
+[ ! $1 ] && \
+  clear && \
+  echo " try remove <file>" && \
+  bash backup && \
+  exit
+[ ! -d ./*/ ] && \
+  clear && \
+  echo " no repo here" && \
+  bash backup && \
+  exit
+clear
+echo " Select a repo"
+echo #ho tolto 'repo' sostituito con repo
+ls -d ./*/ 2> /dev/null | cut -d "/" -f2 | while read repo 
+do 
+ echo "  $repo "
+done
+echo
+echo -n " >> "
+read selected_repo
+clear
+# descriptor sintax : lhs operator rhs{file,&n,&-}
+# open file descriptor 3 &0 special: places where another 
+# read -p=display a prompt
+exec 3<&0
+ #search in repo files
+find ./"$selected_repo"/ -type f -name "$1" | cut -d "/" -f3- | while read listed_file 
+do
+ read -p " Remove <$listed_file> from repo(y/n)? " <&3 
+ [ "$REPLY" = "y" ] && \
+ echo -n "  " && rm -v ./"$selected_repo"/"$listed_file"
+done
+ #search in repo backup files
+find ./."$selected_repo".bck/ -type f -name "$1" | cut -d "/" -f3- | while read listed_file 
+do
+read -p " Remove <$listed_file> from backup(y/n)? " <&3
+ [ "$REPLY" = "y" ] && \
+ echo -n "  " && rm -v ./."$selected_repo".bck/"$listed_file"
+done
+ #search in repo  files.*
+find ./"$selected_repo"/ -type f -name "$1".* | cut -d "/" -f3- | while read listed_file 
+do
+ read -p " Remove <$listed_file> from repo(y/n)? " <&3 
+ [ "$REPLY" = "y" ] && \
+ echo -n "  " && rm -v ./"$selected_repo"/"$listed_file"
+done
+ #search in repo backup files.*
+find ./."$selected_repo".bck/ -type f -name "$1".* | cut -d "/" -f3- | while read listed_file 
+do
+read -p " Remove <$listed_file> from backup(y/n)? " <&3
+ [ "$REPLY" = "y" ] && \
+ echo -n "  " && rm -v ./."$selected_repo".bck/"$listed_file"
+done
+exec 3<&-
+##closed file descriptor3 &- special: nowhere
+bash backup && exit
+################################################################################################

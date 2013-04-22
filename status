@@ -1,0 +1,49 @@
+#!/bin/bash
+###################################################################
+#      echo files name in <repo> different from .<repo>.bck       #
+#      similar to cp -ruv                                         #
+###################################################################
+# check if parameters in input
+[ $# = 0 ] && \
+  clear && \
+  echo " Try status <repo>" && \
+  bash backup && exit
+# check if <repo> folder exist
+[ ! -d "$1" ] && \
+  clear && \
+  echo " Repo not found" && \
+  bash backup && exit 
+# check if .<repo>.bck exist
+[ ! -d ."$1".bck ] && \
+  clear && \
+  echo " Backup folder not found" && \
+  echo " Try init-repo ["$1"]" && \
+  bash backup && \
+  exit
+# Check if <repo> contains anything
+# (list -A= don't list .,..)
+[ `ls -1A "$1"/* | wc -l` -eq 0 ] && \
+  clear && \
+  echo " No files to check" && \
+  bash backup && exit
+
+clear
+
+# write to stdout the files name that differ from the backup
+echo " *** Files in repo \"$1\" that differ from the backup ***"
+find "$1"/* -type f | cut -d "/" -f2- | while read item 
+do
+ if ! diff "$1"/"$item" ."$1".bck/"$item" >& /dev/null; then 
+   echo " $item"
+ fi
+done
+echo " *** Files in backup \"$1\" that differ from the repo ***"
+find ."$1".bck/* -type f | cut -d "/" -f2- | while read item 
+do
+ if ! diff ."$1".bck/"$item" "$1"/"$item" >& /dev/null; then 
+   echo " $item"
+ fi
+done
+
+bash backup && exit
+###################################################################

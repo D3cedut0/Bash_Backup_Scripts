@@ -1,0 +1,27 @@
+#!/bin/bash
+######################################################################
+#  Search a pattern in all repo, write to stdout the result sorted   #
+#  Usage: file_search <pattern>                                      #
+######################################################################
+[ ! "$1" ] && \
+  clear && \
+  echo " try file_search <pattern>" && \
+  bash backup && \
+  exit
+ echo
+ clear
+ echo " *** Pattern found in: ( list sortered by relative path ) ***"
+ find ./* -type f | cut -d "/" -f 2- | sort -d -f | while read files
+  do
+   [ `grep "$1" "$files" | wc -l` != "0" ] && \
+   echo "$files"
+  done 
+ find ./.*.bck -type f | cut -d "/" -f 2- | sort -d -f | while read files
+  do
+   [  `grep "$1" "$files" | wc -l` != "0" ] && \
+   echo "$files"
+  done 
+ echo 
+ echo " *** List end ***"
+ bash backup && exit
+#######################################################################

@@ -1,0 +1,44 @@
+#!/bin/bash
+
+###################################################
+### A simple script for the backup of files #######
+###################################################
+echo ""
+echo " 1. init-repo"
+echo " 2. commit"
+echo " 3. remove"
+echo " 4. revert"
+echo " 5. status"
+echo " 6. file_search"
+echo " 7. quit"
+echo ""
+echo -n " >> "
+#scriptname=case value
+#parameters_string= any other string
+read script_name parameters_string parameters_stringtwo
+case "$script_name" in
+ init-repo)   bash init-repo "$parameters_string";;
+ commit)      bash commit "$parameters_string";;
+ remove)      bash remove "$parameters_string";;
+ revert)      bash revert "$parameters_string" "$parameters_stringtwo";;
+ status)      bash status "$parameters_string";;
+ file_search) if [ ! "$parameters_stringtwo" = "" ]; then
+              bash file_search "$parameters_string $parameters_stringtwo";
+              else bash file_search "$parameters_string";
+              fi;; 
+ [1])      bash init-repo "$parameters_string";;
+ [2])      bash commit "$parameters_string";;
+ [3])      bash remove "$parameters_string";;
+ [4])      bash revert "$parameters_string" "$parameters_stringtwo";;
+ [5])      bash status "$parameters_string";;
+ [6])      if [ ! "$parameters_stringtwo" = "" ]; then
+           bash file_search "$parameters_string $parameters_stringtwo";
+           else bash file_search "$parameters_string";
+           fi;;
+ [7])       exit;;
+ q)         exit;; ## quit 
+ quit)      exit;;  
+ *) echo " wrong selection";
+    bash backup;; #recall itself
+esac
+###################################################

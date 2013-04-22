@@ -1,0 +1,48 @@
+#!/bin/bash
+###############################################################
+#     update and copy original files into backup folder        #
+#      similar to cp -ruv                                      #
+################################################################
+# check if parameters in input
+[ ! "$1" ] && \
+  clear && \
+  echo " Try commit <repo>" && \
+  bash backup && exit
+# check if <repo> folder exist
+[ ! -d "$1" ] && \
+  clear && \
+  echo " Repo not found" && \
+  bash backup && exit 
+#check if .<repo>.bck exist
+[ ! -d ."$1".bck ] && \
+  clear && \
+  echo  "Backup folder not found" && \
+  echo " Try init-repo [ $1 ]" && \
+  bash backup && \
+  exit
+#Check if <repo> contains anything
+# (list -A= don't list . and ..)
+[ `ls -1A "$1"/* | wc -l` -eq 0 ] && \
+  clear && \
+  echo " No files for backup" && \
+  bash backup && exit
+
+clear
+# copy different files only
+echo " *** Updating Directories ***"
+find "$1"/* -type d | cut -d "/" -f2- | while read folder
+ do 
+  [ ! -d ."$1".bck/"$folder" ] && mkdir -pv ."$1".bck/"$folder" 
+ done 
+# -v verbose=stdout info
+echo " *** Updating Files ***"
+find "$1"/* -type f | cut -d "/" -f2- | while read item 
+ do
+  [ ! -f ."$1".bck/"$item" ] && \
+    cp -v "$1"/"$item" ."$1".bck/"$item"
+  if ! diff "$1"/"$item" ."$1".bck/"$item" > /dev/null; then 
+    cp -v "$1"/"$item" ."$1".bck/"$item"
+  fi
+ done
+bash backup && exit
+################################################################

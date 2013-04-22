@@ -1,0 +1,16 @@
+#!/bin/bash
+################################################
+#    Creation of <repo> and backup folders     #
+################################################
+#if no parameters return
+[ ! "$1" ] && \
+  clear && \
+  echo " try init-repo <repo>" && \
+  bash backup && \
+  exit
+
+mkdir -p "$1" ."$1".bck
+echo " *** Init-repo completed successfully ***"
+bash backup #return to menu
+exit
+###############################################
